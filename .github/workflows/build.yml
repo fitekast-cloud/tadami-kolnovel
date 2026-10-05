@@ -1,0 +1,37 @@
+name: Build Tadami KolNovel
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Prepare project
+        run: |
+          unzip -o tadami-kolnovel-0.62.8-integrated.zip -d project
+          cp -R project/extension ./extension
+          cp project/scripts/build-kolnovel.sh ./build-kolnovel.sh
+          chmod +x ./build-kolnovel.sh
+
+      - name: Build extension
+        run: ./build-kolnovel.sh
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: tadami-kolnovel
+          path: dist/*.apk
